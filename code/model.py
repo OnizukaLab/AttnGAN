@@ -10,6 +10,7 @@ from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from miscc.config import cfg
 from GlobalAttention import GlobalAttentionGeneral as ATT_NET
+NCH = 1  # n-channel. 1 is for monotone image
 
 
 class GLU(nn.Module):
@@ -21,6 +22,7 @@ class GLU(nn.Module):
         assert nc % 2 == 0, 'channels dont divide 2!'
         nc = int(nc/2)
         return x[:, :nc] * torch.sigmoid(x[:, nc:])
+
 
 class Interpolate(nn.Module):
     def __init__(self, scale_factor, mode, size=None):
@@ -218,8 +220,10 @@ class CNN_ENCODER(nn.Module):
 
     def forward(self, x):
         features = None
+        if NCH == 1:
+            x = x.repeat(1, 3, 1, 1)  # to 3-channel
         # --> fixed-size input: batch x 3 x 299 x 299
-        x = nn.functional.interpolate(x,size=(299, 299), mode='bilinear', align_corners=False)
+        x = nn.functional.interpolate(x, size=(299, 299), mode='bilinear', align_corners=False)
         # 299 x 299 x 3
         x = self.Conv2d_1a_3x3(x)
         # 149 x 149 x 32
@@ -397,7 +401,7 @@ class GET_IMAGE_G(nn.Module):
         super(GET_IMAGE_G, self).__init__()
         self.gf_dim = ngf
         self.img = nn.Sequential(
-            conv3x3(ngf, 3),
+            conv3x3(ngf, NCH),
             nn.Tanh()
         )
 
@@ -527,7 +531,7 @@ def downBlock(in_planes, out_planes):
 def encode_image_by_16times(ndf):
     encode_img = nn.Sequential(
         # --> state size. ndf x in_size/2 x in_size/2
-        nn.Conv2d(3, ndf, 4, 2, 1, bias=False),
+        nn.Conv2d(NCH, ndf, 4, 2, 1, bias=False),
         nn.LeakyReLU(0.2, inplace=True),
         # --> state size 2ndf x x in_size/4 x in_size/4
         nn.Conv2d(ndf, ndf * 2, 4, 2, 1, bias=False),
