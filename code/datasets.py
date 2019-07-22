@@ -307,6 +307,5 @@ class TextDataset(data.Dataset):
         caps, cap_len = self.get_caption(new_sent_ix)
         return imgs, caps, cap_len, cls_id, key
 
-
     def __len__(self):
         return len(self.filenames)
