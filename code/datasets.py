@@ -117,6 +117,7 @@ class TextDataset(data.Dataset):
 
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
         self.number_example = len(self.filenames)
+        self.sent_ix = 0
 
     def load_bbox(self):
         data_dir = self.data_dir
@@ -248,11 +249,18 @@ class TextDataset(data.Dataset):
         img_name = '%s/images/%s.jpg' % (data_dir, key)
         imgs = get_imgs(img_name, self.imsize,
                         bbox, self.transform, normalize=self.norm)
-        # random select a sentence
-        sent_ix = random.randint(0, self.embeddings_num)
+        if cfg.B_VALIDATION:
+            sent_ix = self.sent_ix
+        else:
+            # random select a sentence
+            sent_ix = random.randint(0, self.embeddings_num-1)
         new_sent_ix = index * self.embeddings_num + sent_ix
         caps, cap_len = self.get_caption(new_sent_ix)
         return imgs, caps, cap_len, cls_id, key
+
+    def set_sent_ix(self, sent_ix):
+        assert 0 <= sent_ix < self.embeddings_num, "invalid sent_ix: {}".format(sent_ix)
+        self.sent_ix = sent_ix
 
     def __len__(self):
         return len(self.filenames)
