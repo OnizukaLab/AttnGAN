@@ -390,7 +390,9 @@ class condGANTrainer(object):
 
             cnt = 0
 
-            for _ in range(1):  # (cfg.TEXT.CAPTIONS_PER_IMAGE):
+            for sent_ix in range(cfg.TEXT.CAPTIONS_PER_IMAGE):
+                self.data_loader.dataset.set_sent_ix(sent_ix)
+                print("sent_ix", sent_ix)
                 for step, data in enumerate(self.data_loader, 0):
                     cnt += batch_size
                     if step % 100 == 0:
@@ -429,7 +431,7 @@ class condGANTrainer(object):
                         im = im.astype(np.uint8)
                         im = np.transpose(im, (1, 2, 0))
                         im = Image.fromarray(im)
-                        fullpath = '%s_s%d.png' % (s_tmp, k)
+                        fullpath = '%s_s%d_sent%s.jpg' % (s_tmp, k, sent_ix)
                         im.save(fullpath)
 
     def gen_example(self, data_dic):
