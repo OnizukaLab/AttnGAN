@@ -45,7 +45,7 @@ def drawCaption(convas, captions, ixtoword, vis_size, off1=2, off2=2):
                 break
             word = ixtoword[cap[j]].encode('ascii', 'ignore').decode('ascii')
             d.text(((j + off1) * (vis_size + off2), i * FONT_MAX), '%d:%s' % (j, word[:6]),
-                   font=fnt, fill=(255, 255, 255, 255) if NCH==3 else 255)
+                   font=fnt, fill=(255, 255, 255, 255) if NCH == 3 else 255)
             sentence.append(word)
         sentence_list.append(sentence)
     return img_txt, sentence_list
@@ -73,7 +73,6 @@ def build_super_images(real_imgs, captions, ixtoword,
         istart = (i + 2) * (vis_size + 2)
         iend = (i + 3) * (vis_size + 2)
         text_convas[:, istart:iend, :] = COLOR_DIC[i] if NCH == 3 else sum(COLOR_DIC[i])//3
-
 
     real_imgs = \
         nn.functional.interpolate(real_imgs,size=(vis_size, vis_size),
