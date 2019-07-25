@@ -47,7 +47,7 @@ def vectorize_caption(wordtoix, caption, copies=2):
 
 def generate(caption, wordtoix, ixtoword, text_encoder, netG, blob_service, copies=2):
     # load word vector
-    captions, cap_lens  = vectorize_caption(wordtoix, caption, copies)
+    captions, cap_lens = vectorize_caption(wordtoix, caption, copies)
     n_words = len(wordtoix)
 
     # only one to generate
