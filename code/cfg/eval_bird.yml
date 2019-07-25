@@ -5,18 +5,19 @@ DATA_DIR: '../data/birds'
 GPU_ID: 3
 WORKERS: 1
 
-B_VALIDATION: False  # True  # False
+B_VALIDATION: True  # False
 TREE:
     BRANCH_NUM: 3
 
 
 TRAIN:
     FLAG: False
-    NET_G: '../models/bird_AttnGAN2.pth'
+    NET_G: "../output/birds_attn2_2019_07_18_05_40_10/Model/netG_epoch_200.pth"
+    # '../models/bird_AttnGAN2.pth'
     B_NET_D: False
-    BATCH_SIZE: 100
-    NET_E: '../DAMSMencoders/bird/text_encoder200.pth'
-
+    BATCH_SIZE: 16
+    NET_E: "../output/birds_DAMSM_2019_07_17_09_47_28/Model/text_encoder550.pth"
+    # '../DAMSMencoders/bird/text_encoder200.pth'
 
 GAN:
     DF_DIM: 64
