@@ -429,7 +429,7 @@ class condGANTrainer(object):
                         # [-1, 1] --> [0, 255]
                         im = (im + 1.0) * 127.5
                         im = im.astype(np.uint8)
-                        im = np.transpose(im, (1, 2, 0))
+                        im = np.squeeze(np.transpose(im, (1, 2, 0)))
                         im = Image.fromarray(im)
                         fullpath = '%s_s%d_sent%s.jpg' % (s_tmp, k, sent_ix)
                         im.save(fullpath)
