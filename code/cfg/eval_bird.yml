@@ -12,7 +12,7 @@ TREE:
 
 TRAIN:
     FLAG: False
-    NET_G: "../output/birds_attn2_2019_07_25_10_29_58/Model/netG_epoch_600.pth"
+    NET_G: "../output/birds_attn2_2019_07_25_10_29_58/Model/netG_epoch_550.pth"
     # '../models/bird_AttnGAN2.pth'
     B_NET_D: False
     BATCH_SIZE: 7
