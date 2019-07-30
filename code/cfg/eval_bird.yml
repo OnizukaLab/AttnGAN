@@ -12,10 +12,10 @@ TREE:
 
 TRAIN:
     FLAG: False
-    NET_G: "../output/birds_attn2_2019_07_18_05_40_10/Model/netG_epoch_200.pth"
+    NET_G: "../output/birds_attn2_2019_07_25_10_29_58/Model/netG_epoch_550.pth"
     # '../models/bird_AttnGAN2.pth'
     B_NET_D: False
-    BATCH_SIZE: 16
+    BATCH_SIZE: 7
     NET_E: "../output/birds_DAMSM_2019_07_17_09_47_28/Model/text_encoder550.pth"
     # '../DAMSMencoders/bird/text_encoder200.pth'
 
