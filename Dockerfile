@@ -3,7 +3,7 @@ RUN apt-get update && apt-get install -y git htop less graphviz && apt-get clean
 RUN conda install -y numpy
 RUN pip install --upgrade pip && pip install Cython && \
     pip install --upgrade torch==1.0.0 && pip install jupyterlab matplotlib scikit-image nltk\
-    torchfile pandas easydict pyyaml pytest dill torchvision==0.2.1
+    torchfile pandas easydict pyyaml pytest dill torchvision==0.2.1 pytorch-transformers
 
 ENV PYTHONPATH /opt/project
 WORKDIR /workspace
