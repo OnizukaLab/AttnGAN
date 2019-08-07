@@ -1,7 +1,7 @@
 from __future__ import print_function
 
 from miscc.utils import mkdir_p
-from miscc.utils import build_super_images
+from miscc.utils import build_super_images, get_image_transform
 from miscc.losses import sent_loss, words_loss
 from miscc.config import cfg, cfg_from_file
 
@@ -234,11 +234,7 @@ if __name__ == "__main__":
     # Get data loader ##################################################
     imsize = cfg.TREE.BASE_SIZE * (2 ** (cfg.TREE.BRANCH_NUM-1))
     batch_size = cfg.TRAIN.BATCH_SIZE
-    image_transform = transforms.Compose([
-        transforms.Grayscale(num_output_channels=1),
-        transforms.Resize(int(imsize * 76 / 64)),
-        transforms.RandomCrop(imsize),
-        transforms.RandomHorizontalFlip()])
+    image_transform = get_image_transform(imsize)
     dataset = TextDataset(cfg.DATA_DIR, 'train',
                           base_size=cfg.TREE.BASE_SIZE,
                           transform=image_transform)

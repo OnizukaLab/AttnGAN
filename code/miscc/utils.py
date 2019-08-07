@@ -5,8 +5,9 @@ from torch.nn import init
 
 import torch
 import torch.nn as nn
+from torchvision import transforms
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from copy import deepcopy
 import skimage.transform
 
@@ -26,6 +27,24 @@ COLOR_DIC = {0:[128,64,128],  1:[244, 35,232],
              16:[0, 80, 100], 17:[0, 0, 230],
              18:[0,  0, 70],  19:[0, 0,  0]}
 FONT_MAX = 50
+
+
+def get_image_transform(imsize):
+    # # transform for grayscale
+    # image_transform = transforms.Compose([
+    #     transforms.Grayscale(num_output_channels=1),
+    #     transforms.Resize(int(imsize * 76 / 64)),
+    #     transforms.RandomCrop(imsize),
+    #     transforms.RandomHorizontalFlip()])
+
+    # transform for bular
+    image_transform = transforms.Compose([
+        transforms.Grayscale(num_output_channels=1),
+        transforms.Resize(int(imsize * 76 / 64)),
+        transforms.RandomCrop(imsize),
+        transforms.Lambda(lambda im: im.filter(ImageFilter.GaussianBlur(radius=imsize/128))),
+        transforms.RandomHorizontalFlip()])
+    return image_transform
 
 
 def drawCaption(convas, captions, ixtoword, vis_size, off1=2, off2=2):
