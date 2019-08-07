@@ -6,10 +6,11 @@ from torchvision import models
 import torch.utils.model_zoo as model_zoo
 import torch.nn.functional as F
 
-from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
+from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
 
 from miscc.config import cfg
 from GlobalAttention import GlobalAttentionGeneral as ATT_NET
+from pytorch_transformers import BertModel
 
 
 class GLU(nn.Module):
@@ -20,6 +21,7 @@ class GLU(nn.Module):
         nc = x.size(1)
         assert nc % 2 == 0, 'channels dont divide 2!'
         nc = int(nc/2)
+        # noinspection PyUnresolvedReferences
         return x[:, :nc] * torch.sigmoid(x[:, nc:])
 
 
@@ -172,6 +174,21 @@ class RNN_ENCODER(nn.Module):
         return words_emb, sent_emb
 
 
+class BERT_ENCODER(nn.Module):
+
+    def __init__(self, pretrained_weights):
+        super(BERT_ENCODER, self).__init__()
+        self.bert_model = BertModel.from_pretrained(pretrained_weights)
+        for p in self.bert_model.parameters():
+            p.requires_grad = False
+        self.pad_id = 0  # TODO: it is hard coding
+
+    def forward(self, captions):
+        padded_captions = pad_sequence(captions, batch_first=True, padding_value=self.pad_id)
+        word_vectors, sentence_vector = self.bert_model(padded_captions)
+        return word_vectors.transpose(1, 2), sentence_vector
+
+
 class CNN_ENCODER(nn.Module):
     def __init__(self, nef):
         super(CNN_ENCODER, self).__init__()
@@ -297,11 +314,14 @@ class CA_NET(nn.Module):
         logvar = x[:, self.c_dim:]
         return mu, logvar
 
-    def reparametrize(self, mu, logvar):
+    @staticmethod
+    def reparametrize(mu, logvar):
         std = logvar.mul(0.5).exp_()
         if cfg.CUDA:
+            # noinspection PyUnresolvedReferences
             eps = torch.cuda.FloatTensor(std.size()).normal_()
         else:
+            # noinspection PyUnresolvedReferences
             eps = torch.FloatTensor(std.size()).normal_()
         eps = Variable(eps)
         return eps.mul(std).add_(mu)
@@ -338,6 +358,7 @@ class INIT_STAGE_G(nn.Module):
         :param c_code: batch x cfg.TEXT.EMBEDDING_DIM
         :return: batch x ngf/16 x 64 x 64
         """
+        # noinspection PyUnresolvedReferences
         c_z_code = torch.cat((c_code, z_code), 1)
         # state size ngf x 4 x 4
         out_code = self.fc(c_z_code)
@@ -363,9 +384,10 @@ class NEXT_STAGE_G(nn.Module):
         self.num_residual = cfg.GAN.R_NUM
         self.define_module()
 
-    def _make_layer(self, block, channel_num):
+    @staticmethod
+    def _make_layer(block, channel_num):
         layers = []
-        for i in range(cfg.GAN.R_NUM):
+        for _ in range(cfg.GAN.R_NUM):
             layers.append(block(channel_num))
         return nn.Sequential(*layers)
 
@@ -384,6 +406,7 @@ class NEXT_STAGE_G(nn.Module):
         """
         self.att.applyMask(mask)
         c_code, att = self.att(h_code, word_embs)
+        # noinspection PyUnresolvedReferences
         h_c_code = torch.cat((h_code, c_code), 1)
         out_code = self.residual(h_c_code)
 
@@ -458,7 +481,6 @@ class G_NET(nn.Module):
                 att_maps.append(att2)
 
         return fake_imgs, att_maps, mu, logvar
-
 
 
 class G_DCGAN(nn.Module):
@@ -565,6 +587,7 @@ class D_GET_LOGITS(nn.Module):
             c_code = c_code.view(-1, self.ef_dim, 1, 1)
             c_code = c_code.repeat(1, 1, 4, 4)
             # state size (ngf+egf) x 4 x 4
+            # noinspection PyUnresolvedReferences
             h_c_code = torch.cat((h_code, c_code), 1)
             # state size ngf x in_size x in_size
             h_c_code = self.jointConv(h_c_code)

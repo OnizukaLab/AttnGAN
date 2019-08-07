@@ -1,7 +1,6 @@
 import os
 import errno
 import numpy as np
-from torch.nn import init
 
 import torch
 import torch.nn as nn
@@ -27,30 +26,28 @@ COLOR_DIC = {0:[128,64,128],  1:[244, 35,232],
 FONT_MAX = 50
 
 
-def drawCaption(convas, captions, ixtoword, vis_size, off1=2, off2=2):
+def drawCaption(convas, captions, tokenizer, vis_size, off1=2, off2=2):
     num = captions.size(0)
     img_txt = Image.fromarray(convas)
     # get a font
     # fnt = None  # ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 50)
-    fnt = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 50)
+    fnt = ImageFont.truetype('../eval/FreeMono.ttf', 50)
     # get a drawing context
     d = ImageDraw.Draw(img_txt)
     sentence_list = []
     for i in range(num):
         cap = captions[i].data.cpu().numpy()
-        sentence = []
-        for j in range(len(cap)):
-            if cap[j] == 0:
+        sentence = tokenizer.decode(cap)
+        sentence_list.append(sentence)
+        for j, word in enumerate(sentence.split()):
+            if word == tokenizer.pad_token:
                 break
-            word = ixtoword[cap[j]].encode('ascii', 'ignore').decode('ascii')
             d.text(((j + off1) * (vis_size + off2), i * FONT_MAX), '%d:%s' % (j, word[:6]),
                    font=fnt, fill=(255, 255, 255, 255))
-            sentence.append(word)
-        sentence_list.append(sentence)
     return img_txt, sentence_list
 
 
-def build_super_images(real_imgs, captions, ixtoword,
+def build_super_images(real_imgs, captions, tokenizer,
                        attn_maps, att_sze, lr_imgs=None,
                        batch_size=cfg.TRAIN.BATCH_SIZE,
                        max_word_num=cfg.TEXT.WORDS_NUM):
@@ -101,7 +98,7 @@ def build_super_images(real_imgs, captions, ixtoword,
     num = nvis  # len(attn_maps)
 
     text_map, sentences = \
-        drawCaption(text_convas, captions, ixtoword, vis_size)
+        drawCaption(text_convas, captions, tokenizer, vis_size)
     text_map = np.asarray(text_map).astype(np.uint8)
 
     bUpdate = 1
@@ -179,7 +176,7 @@ def build_super_images(real_imgs, captions, ixtoword,
         return None
 
 
-def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
+def build_super_images2(real_imgs, captions, cap_lens, tokenizer,
                         attn_maps, att_sze, vis_size=256, topK=5):
     batch_size = real_imgs.size(0)
     max_word_num = np.max(cap_lens)
@@ -203,7 +200,7 @@ def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
     num = len(attn_maps)
 
     text_map, sentences = \
-        drawCaption(text_convas, captions, ixtoword, vis_size, off1=0)
+        drawCaption(text_convas, captions, tokenizer, vis_size, off1=0)
     text_map = np.asarray(text_map).astype(np.uint8)
 
     bUpdate = 1
@@ -270,14 +267,14 @@ def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
             row_merge_new.append(row_merge[idx])
             txt_new.append(row_txt[idx])
         row = np.concatenate(row_new[:topK], 1)
-        row_merge = np.concatenate(row_merge_new[:topK], 1)
+        row_merge_new = np.concatenate(row_merge_new[:topK], 1)
         txt = np.concatenate(txt_new[:topK], 1)
         if txt.shape[1] != row.shape[1]:
             print('Warnings: txt', txt.shape, 'row', row.shape,
                   'row_merge_new', row_merge_new.shape)
             bUpdate = 0
             break
-        row = np.concatenate([txt, row_merge], 0)
+        row = np.concatenate([txt, row_merge_new], 0)
         img_set.append(row)
     if bUpdate:
         img_set = np.concatenate(img_set, 0)

@@ -163,7 +163,7 @@ def word_index():
     if ixtoword is None or wordtoix is None:
         #print("ix and word not cached")
         # load word to index dictionary
-        x = pickle.load(open('data/captions.pickle', 'rb'))
+        x = pickle.load(open('data/bert_captions.pickle', 'rb'))
         ixtoword = x[2]
         wordtoix = x[3]
         del x
