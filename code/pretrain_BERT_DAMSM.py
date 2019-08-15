@@ -44,12 +44,14 @@ def parse_args():
     parser.add_argument('--gpu', dest='gpu_id', type=int, default=0)
     parser.add_argument('--data_dir', dest='data_dir', type=str, default='')
     parser.add_argument('--manualSeed', type=int, help='manual seed')
+    parser.add_argument('--start_fine_tuning', type=int, default=0,
+                        help='start_epoch for fine-tuning the text_encoder')
     args = parser.parse_args()
     return args
 
 
 def train(dataloader, cnn_model, rnn_model, batch_size,
-          labels, optimizer, epoch, image_dir):
+          labels, optimizer, epoch, image_dir, do_fine_tuning):
     cnn_model.train()
     rnn_model.train()
     s_total_loss0 = torch.tensor(0.)
@@ -60,12 +62,11 @@ def train(dataloader, cnn_model, rnn_model, batch_size,
     start_time = time.time()
     for step, data in enumerate(dataloader, 0):
         # print('step', step)
-        # rnn_model.zero_grad()
+        rnn_model.zero_grad()
         cnn_model.zero_grad()
 
         imgs, captions, cap_lens, \
             class_ids, keys = prepare_data(data)
-
 
         # words_features: batch_size x nef x 17 x 17
         # sent_code: batch_size x nef
@@ -76,7 +77,11 @@ def train(dataloader, cnn_model, rnn_model, batch_size,
 
         # words_emb: batch_size x nef x seq_len
         # sent_emb: batch_size x nef
-        words_emb, sent_emb = rnn_model(captions)
+        if do_fine_tuning:
+            words_emb, sent_emb = rnn_model(captions)
+        else:
+            with torch.no_grad():
+                words_emb, sent_emb = rnn_model(captions)
 
         w_loss0, w_loss1, attn_maps = words_loss(words_features, words_emb, labels,
                                                  cap_lens, class_ids, batch_size)
@@ -94,8 +99,8 @@ def train(dataloader, cnn_model, rnn_model, batch_size,
         #
         # `clip_grad_norm` helps prevent
         # the exploding gradient problem in RNNs / LSTMs.
-        # torch.nn.utils.clip_grad_norm(rnn_model.parameters(),
-        #                               cfg.TRAIN.RNN_GRAD_CLIP)
+        torch.nn.utils.clip_grad_norm(rnn_model.parameters(),
+                                      cfg.TRAIN.RNN_GRAD_CLIP)
         optimizer.step()
 
         if step % UPDATE_INTERVAL == 0:
@@ -255,7 +260,7 @@ if __name__ == "__main__":
 
     # Train ##############################################################
     text_encoder, image_encoder, labels, start_epoch = build_models()
-    para = []  # BEAT Model not be optimized
+    para = list(text_encoder.parameters())
     for v in image_encoder.parameters():
         if v.requires_grad:
             para.append(v)
@@ -267,14 +272,15 @@ if __name__ == "__main__":
             optimizer = optim.Adam(para, lr=lr, betas=(0.5, 0.999))
             epoch_start_time = time.time()
             count = train(dataloader, image_encoder, text_encoder,
-                          batch_size, labels, optimizer, epoch, image_dir)
+                          batch_size, labels, optimizer, epoch, image_dir,
+                          args.start_fine_tuning <= epoch)
             print('-' * 89)
             if len(dataloader_val) > 0:
                 s_loss, w_loss = evaluate(dataloader_val, image_encoder,
                                           text_encoder, batch_size)
                 print('| end epoch {:3d} | valid loss '
-                      '{:5.2f} {:5.2f} | lr {:.5f}|'
-                      .format(epoch, s_loss, w_loss, lr))
+                      '{:5.2f} {:5.2f} | lr {:.5f}| do_fine_tuning {}'
+                      .format(epoch, s_loss, w_loss, lr, args.start_fine_tuning <= epoch))
             print('-' * 89)
             if lr > cfg.TRAIN.ENCODER_LR/10.:
                 lr *= 0.98
