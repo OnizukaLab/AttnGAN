@@ -188,6 +188,9 @@ class BERT_ENCODER(nn.Module):
         word_vectors, sentence_vector = self.bert_model(padded_captions)
         return word_vectors.transpose(1, 2), sentence_vector
 
+    def save(self, path):
+        self.bert_model.save_pretrained(path)
+
 
 class CNN_ENCODER(nn.Module):
     def __init__(self, nef):

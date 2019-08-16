@@ -289,8 +289,7 @@ if __name__ == "__main__":
                 epoch == cfg.TRAIN.MAX_EPOCH):
                 torch.save(image_encoder.state_dict(),
                            '%s/image_encoder%d.pth' % (model_dir, epoch))
-                # torch.save(text_encoder.state_dict(),
-                #            '%s/text_encoder%d.pth' % (model_dir, epoch))
+                text_encoder.save('%s/text_encoder%d' % (model_dir, epoch))
                 print('Save G/Ds models.')
     except KeyboardInterrupt:
         print('-' * 89)
