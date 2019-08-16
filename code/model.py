@@ -180,8 +180,6 @@ class BERT_ENCODER(nn.Module):
     def __init__(self, pretrained_weights):
         super(BERT_ENCODER, self).__init__()
         self.bert_model = BertModel.from_pretrained(pretrained_weights)
-        for p in self.bert_model.parameters():
-            p.requires_grad = False
         self.pad_id = 0  # TODO: it is hard coding
 
     def forward(self, captions):

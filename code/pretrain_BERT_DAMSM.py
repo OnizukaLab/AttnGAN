@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
     # Train ##############################################################
     text_encoder, image_encoder, labels, start_epoch = build_models()
-    para = list(text_encoder.parameters())
+    para = [p for n, p in text_encoder.named_parameters()]
     for v in image_encoder.parameters():
         if v.requires_grad:
             para.append(v)
