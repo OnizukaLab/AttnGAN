@@ -9,6 +9,7 @@ import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence, pad_sequence
 
 from miscc.config import cfg
+from miscc.utils import mkdir_p
 from GlobalAttention import GlobalAttentionGeneral as ATT_NET
 from pytorch_transformers import BertModel
 
@@ -189,6 +190,7 @@ class BERT_ENCODER(nn.Module):
         return word_vectors.transpose(1, 2), sentence_vector
 
     def save(self, path):
+        mkdir_p(path)
         self.bert_model.save_pretrained(path)
 
 
