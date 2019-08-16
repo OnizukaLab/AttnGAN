@@ -50,7 +50,12 @@ class condGANTrainer(object):
             return
 
         image_encoder = CNN_ENCODER(cfg.TEXT.EMBEDDING_DIM)
-        img_encoder_path = cfg.TRAIN.NET_E.replace('text_encoder', 'image_encoder')
+        if "text_encoder" in cfg.TRAIN.NET_E:
+            pretrained_weights = cfg.TRAIN.NET_E
+            img_encoder_path = cfg.TRAIN.NET_E.replace('text_encoder', 'image_encoder')+".pth"
+        else:
+            pretrained_weights = PRETRAINED_WEIGHTS
+            img_encoder_path = cfg.TRAIN.NET_E
         state_dict = \
             torch.load(img_encoder_path, map_location=lambda storage, loc: storage)
         image_encoder.load_state_dict(state_dict)
@@ -59,8 +64,10 @@ class condGANTrainer(object):
         print('Load image encoder from:', img_encoder_path)
         image_encoder.eval()
 
-        text_encoder = BERT_ENCODER(PRETRAINED_WEIGHTS)
-        print('Load text encoder from:', PRETRAINED_WEIGHTS)
+        text_encoder = BERT_ENCODER(pretrained_weights)
+        for p in text_encoder.parameters():
+            p.requires_grad = False
+        print('Load text encoder from:', pretrained_weights)
         text_encoder.eval()
 
         # #######################generator and discriminators############## #
@@ -346,8 +353,12 @@ class condGANTrainer(object):
             netG.apply(weights_init)
             netG.cuda()
             netG.eval()
-            #
-            text_encoder = BERT_ENCODER(PRETRAINED_WEIGHTS)
+
+            if "text_encoder" in cfg.TRAIN.NET_E:
+                pretrained_weights = cfg.TRAIN.NET_E
+            else:
+                pretrained_weights = PRETRAINED_WEIGHTS
+            text_encoder = BERT_ENCODER(pretrained_weights)
             text_encoder = text_encoder.cuda()
             text_encoder.eval()
 
@@ -418,7 +429,11 @@ class condGANTrainer(object):
             print('Error: the path for morels is not found!')
         else:
             # Build and load the generator
-            text_encoder = BERT_ENCODER(PRETRAINED_WEIGHTS)
+            if "text_encoder" in cfg.TRAIN.NET_E:
+                pretrained_weights = cfg.TRAIN.NET_E
+            else:
+                pretrained_weights = PRETRAINED_WEIGHTS
+            text_encoder = BERT_ENCODER(pretrained_weights)
             text_encoder = text_encoder.cuda()
             text_encoder.eval()
 
