@@ -291,6 +291,11 @@ if __name__ == "__main__":
                            '%s/image_encoder%d.pth' % (model_dir, epoch))
                 text_encoder.save('%s/text_encoder%d' % (model_dir, epoch))
                 print('Save G/Ds models.')
+        # save the last model
+        torch.save(image_encoder.state_dict(),
+                   '%s/image_encoder_latest.pth' % model_dir)
+        text_encoder.save('%s/text_encoder_latest' % model_dir)
+        print('Save G/Ds models.')
     except KeyboardInterrupt:
         print('-' * 89)
         print('Exiting from training early')
