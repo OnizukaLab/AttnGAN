@@ -29,6 +29,8 @@ def parse_args():
     parser.add_argument('--gpu', dest='gpu_id', type=int, default=-1)
     parser.add_argument('--data_dir', dest='data_dir', type=str, default='')
     parser.add_argument('--manualSeed', type=int, help='manual seed')
+    parser.add_argument('--start_fine_tuning', type=int, default=0,
+                        help='start_epoch for fine-tuning the text_encoder')
     args = parser.parse_args()
     return args
 
