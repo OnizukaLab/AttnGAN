@@ -82,7 +82,9 @@ class GlobalAttentionGeneral(nn.Module):
     def forward(self, input, context):
         """
             input: batch x idf x ih x iw (queryL=ihxiw)
+            :type input: torch.Tensor
             context: batch x cdf x sourceL
+            :type context: torch.Tensor
         """
         ih, iw = input.size(2), input.size(3)
         queryL = ih * iw

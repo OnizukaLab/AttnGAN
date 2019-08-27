@@ -463,7 +463,6 @@ class G_NET(nn.Module):
         return fake_imgs, att_maps, mu, logvar
 
 
-
 class G_DCGAN(nn.Module):
     def __init__(self):
         super(G_DCGAN, self).__init__()

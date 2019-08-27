@@ -1,7 +1,6 @@
 import os
 import errno
 import numpy as np
-from torch.nn import init
 
 import torch
 import torch.nn as nn
@@ -16,16 +15,16 @@ NCH = 1
 
 
 # For visualization ################################################
-COLOR_DIC = {0:[128,64,128],  1:[244, 35,232],
-             2:[70, 70, 70],  3:[102,102,156],
-             4:[190,153,153], 5:[153,153,153],
-             6:[250,170, 30], 7:[220, 220, 0],
-             8:[107,142, 35], 9:[152,251,152],
-             10:[70,130,180], 11:[220,20, 60],
-             12:[255, 0, 0],  13:[0, 0, 142],
-             14:[119,11, 32], 15:[0, 60,100],
-             16:[0, 80, 100], 17:[0, 0, 230],
-             18:[0,  0, 70],  19:[0, 0,  0]}
+COLOR_DIC = {0: [128, 64, 128],  1: [244, 35, 232],
+             2: [70, 70, 70],  3: [102, 102, 156],
+             4: [190, 153, 153], 5: [153, 153, 153],
+             6: [250, 170, 30], 7: [220, 220, 0],
+             8: [107, 142, 35], 9: [152, 251, 152],
+             10: [70, 130, 180], 11: [220, 20, 60],
+             12: [255, 0, 0],  13: [0, 0, 142],
+             14: [119, 11, 32], 15: [0, 60, 100],
+             16: [0, 80, 100], 17: [0, 0, 230],
+             18: [0,  0, 70],  19: [0, 0,  0]}
 FONT_MAX = 50
 
 
@@ -94,8 +93,7 @@ def build_super_images(real_imgs, captions, ixtoword,
         text_convas[:, istart:iend, :] = COLOR_DIC[i] if NCH == 3 else sum(COLOR_DIC[i])//3
 
     real_imgs = \
-        nn.functional.interpolate(real_imgs,size=(vis_size, vis_size),
-                                  mode='bilinear', align_corners=False)
+        nn.functional.interpolate(real_imgs, size=(vis_size, vis_size), mode='bilinear', align_corners=False)
     # [-1, 1] --> [0, 1]
     real_imgs.add_(1).div_(2).mul_(255)
     real_imgs = real_imgs.data.numpy()
@@ -106,8 +104,7 @@ def build_super_images(real_imgs, captions, ixtoword,
     post_pad = np.zeros([pad_sze[1], pad_sze[2], NCH])
     if lr_imgs is not None:
         lr_imgs = \
-            nn.functional.interpolate(lr_imgs,size=(vis_size, vis_size),
-                                  mode='bilinear', align_corners=False)
+            nn.functional.interpolate(lr_imgs, size=(vis_size, vis_size), mode='bilinear', align_corners=False)
         # [-1, 1] --> [0, 1]
         lr_imgs.add_(1).div_(2).mul_(255)
         lr_imgs = lr_imgs.data.numpy()
@@ -169,7 +166,7 @@ def build_super_images(real_imgs, captions, ixtoword,
                 PIL_att = Image.fromarray(np.uint8(np.squeeze(one_map)))
                 merged = Image.new('RGBA', (vis_size, vis_size), (0, 0, 0, 0)) if NCH == 3\
                     else Image.new('L', (vis_size, vis_size))
-                mask = Image.new('L', (vis_size, vis_size), (210))
+                mask = Image.new('L', (vis_size, vis_size), 210)
                 merged.paste(PIL_im, (0, 0))
                 merged.paste(PIL_att, (0, 0), mask)
                 merged = np.array(merged)[:, :, :3] if NCH == 3 else np.expand_dims(np.array(merged)[:, :], axis=2)
@@ -203,12 +200,10 @@ def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
     batch_size = real_imgs.size(0)
     max_word_num = np.max(cap_lens)
     text_convas = np.ones([batch_size * FONT_MAX,
-                           max_word_num * (vis_size + 2), NCH],
-                           dtype=np.uint8)
+                           max_word_num * (vis_size + 2), NCH], dtype=np.uint8)
 
     real_imgs = \
-        nn.functional.interpolate(real_imgs,size=(vis_size, vis_size),
-                                    mode='bilinear', align_corners=False)
+        nn.functional.interpolate(real_imgs, size=(vis_size, vis_size), mode='bilinear', align_corners=False)
     # [-1, 1] --> [0, 1]
     real_imgs.add_(1).div_(2).mul_(255)
     real_imgs = real_imgs.data.numpy()
@@ -267,7 +262,7 @@ def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
             PIL_att = Image.fromarray(np.uint8(np.squeeze(one_map)))
             merged = Image.new('RGBA', (vis_size, vis_size), (0, 0, 0, 0)) if NCH == 3 \
                 else Image.new('L', (vis_size, vis_size))
-            mask = Image.new('L', (vis_size, vis_size), (180))  # (210)
+            mask = Image.new('L', (vis_size, vis_size), 180)  # (210)
             merged.paste(PIL_im, (0, 0))
             merged.paste(PIL_att, (0, 0), mask)
             merged = np.array(merged)[:, :, :3] if NCH == 3 else np.expand_dims(np.array(merged)[:, :], axis=2)
@@ -289,7 +284,7 @@ def build_super_images2(real_imgs, captions, cap_lens, ixtoword,
             row_merge_new.append(row_merge[idx])
             txt_new.append(row_txt[idx])
         row = np.squeeze(np.concatenate(row_new[:topK], 1))
-        row_merge = np.squeeze(np.concatenate(row_merge_new[:topK], 1))
+        row_merge_new = np.squeeze(np.concatenate(row_merge_new[:topK], 1))
         txt = np.concatenate(txt_new[:topK], 1)
         if txt.shape[1] != row.shape[1]:
             print('Warnings: txt', txt.shape, 'row', row.shape,

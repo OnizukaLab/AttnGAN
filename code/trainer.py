@@ -2,7 +2,6 @@ from __future__ import print_function
 from six.moves import range
 
 import torch
-import torch.nn as nn
 import torch.optim as optim
 from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
@@ -22,7 +21,7 @@ from miscc.losses import discriminator_loss, generator_loss, KL_loss
 import os
 import time
 import numpy as np
-import sys
+
 
 # ################# Text to image task############################ #
 class condGANTrainer(object):
