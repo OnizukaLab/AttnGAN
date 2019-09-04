@@ -22,6 +22,7 @@ class GLU(nn.Module):
         nc = int(nc/2)
         return x[:, :nc] * torch.sigmoid(x[:, nc:])
 
+
 class Interpolate(nn.Module):
     def __init__(self, scale_factor, mode, size=None):
         super(Interpolate, self).__init__()
