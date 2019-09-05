@@ -124,7 +124,7 @@ if __name__ == "__main__":
         transforms.Resize(int(imsize * 76 / 64)),
         transforms.RandomCrop(imsize),
         transforms.RandomHorizontalFlip()])
-    dataset = TextDataset(cfg.DATA_DIR, split_dir,
+    dataset = TextDataset(cfg.DATA_DIR, "train",
                           base_size=cfg.TREE.BASE_SIZE,
                           transform=image_transform)
     assert dataset
