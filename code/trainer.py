@@ -389,7 +389,7 @@ class condGANTrainer(object):
 
             cnt = 0
 
-            for sent_ix in range(cfg.TEXT.CAPTIONS_PER_IMAGE):
+            for sent_ix in range(cfg.TEXT.CAPTIONS_PER_IMAGE)[:0]:  # sample one sentence
                 self.data_loader.dataset.set_sent_ix(sent_ix)
                 print("sent_ix", sent_ix)
                 for step, data in enumerate(self.data_loader, 0):
