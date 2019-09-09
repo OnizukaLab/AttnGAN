@@ -295,7 +295,7 @@ class TextDataset(data.Dataset):
         if (sent_caption == 0).sum() > 0:
             print('ERROR: do not need END (0) token', sent_caption)
         num_words = len(sent_caption)
-        if num_words < 12.6:
+        if num_words > 12.6:
             print("Warning: {}, {}".format(sent_ix, num_words))
             print(sent_caption)
         # pad with 0s (i.e., '<end>')
