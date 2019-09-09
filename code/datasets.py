@@ -118,6 +118,13 @@ class TextDataset(data.Dataset):
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
         self.number_example = len(self.filenames)
 
+        filepath = os.path.join(self.data_dir, 'CUB_200_2011/images.txt')
+        index_path = os.path.join(self.data_dir, "../../short_idx.pickle")
+        with open(index_path, "rb") as f:
+            index = pickle.load(f)
+        f2i = {k: v for k, v in zip(filepath, index)}
+        self.idx = [f2i[f] for f in self.filenames]
+
     def load_bbox(self):
         data_dir = self.data_dir
         bbox_path = os.path.join(data_dir, 'CUB_200_2011/bounding_boxes.txt')
@@ -139,7 +146,6 @@ class TextDataset(data.Dataset):
 
             key = filenames[i][:-4]
             filename_bbox[key] = bbox
-        #
         return filename_bbox
 
     def load_captions(self, data_dir, filenames):
@@ -302,11 +308,10 @@ class TextDataset(data.Dataset):
         imgs = get_imgs(img_name, self.imsize,
                         bbox, self.transform, normalize=self.norm)
         # random select a sentence
-        sent_ix = random.randint(0, self.embeddings_num)
+        sent_ix = self.idx[index]
         new_sent_ix = index * self.embeddings_num + sent_ix
         caps, cap_len = self.get_caption(new_sent_ix)
         return imgs, caps, cap_len, cls_id, key
-
 
     def __len__(self):
         return len(self.filenames)
