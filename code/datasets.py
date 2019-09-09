@@ -116,7 +116,6 @@ class TextDataset(data.Dataset):
             self.wordtoix, self.n_words = self.load_text_data(data_dir, split)
 
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
-        self.number_example = len(self.filenames)
 
         filepath = os.path.join(self.data_dir, 'CUB_200_2011/images.txt')
         with open(filepath, "r") as f:
@@ -126,6 +125,22 @@ class TextDataset(data.Dataset):
             index = pickle.load(f)
         f2i = {k: v for k, v in zip(filenames, index)}
         self.idx = [f2i[f] for f in self.filenames]
+        # drop None caption
+        new_filenames = []
+        new_captions = []
+        new_class_id = []
+        new_idx = []
+        for i, idx in enumerate(self.idx):
+            if idx is not None:
+                new_filenames.append(self.filenames[i])
+                new_captions += self.captions[i*self.embeddings_num:(i+1)*self.embeddings_num]
+                new_class_id.append(self.class_id[i])
+                new_idx.append(self.idx[i])
+        self.filenames = new_filenames
+        self.captions = new_captions
+        self.class_id = new_class_id
+        self.idx = new_idx
+        self.number_example = len(self.filenames)
 
     def load_bbox(self):
         data_dir = self.data_dir
@@ -280,6 +295,7 @@ class TextDataset(data.Dataset):
         if (sent_caption == 0).sum() > 0:
             print('ERROR: do not need END (0) token', sent_caption)
         num_words = len(sent_caption)
+        assert num_words < 12.6, sent_ix
         # pad with 0s (i.e., '<end>')
         x = np.zeros((cfg.TEXT.WORDS_NUM, 1), dtype='int64')
         x_len = num_words
