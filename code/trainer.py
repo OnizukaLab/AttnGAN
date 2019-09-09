@@ -384,7 +384,7 @@ class condGANTrainer(object):
 
             # the path to save generated images
             s_tmp = model_dir[:model_dir.rfind('.pth')]
-            save_dir = '%s/%s' % (s_tmp, split_dir+"_middle")
+            save_dir = '%s/%s' % (s_tmp, split_dir+"_long")
             mkdir_p(save_dir)
 
             cnt = 0
