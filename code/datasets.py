@@ -119,10 +119,12 @@ class TextDataset(data.Dataset):
         self.number_example = len(self.filenames)
 
         filepath = os.path.join(self.data_dir, 'CUB_200_2011/images.txt')
+        with open(filepath, "r") as f:
+            filenames = [line.strip().split()[1][:-4] for line in f]
         index_path = os.path.join(self.data_dir, "../../short_idx.pickle")
         with open(index_path, "rb") as f:
             index = pickle.load(f)
-        f2i = {k[:-4]: v for k, v in zip(filepath, index)}
+        f2i = {k: v for k, v in zip(filenames, index)}
         self.idx = [f2i[f] for f in self.filenames]
 
     def load_bbox(self):
