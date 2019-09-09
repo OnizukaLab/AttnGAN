@@ -276,7 +276,7 @@ class condGANTrainer(object):
                 D_logs = ''
                 for i in range(len(netsD)):
                     netsD[i].zero_grad()
-                    errD = discriminator_loss(netsD[i], imgs[i], fake_imgs[i], random_fake_imgs,
+                    errD = discriminator_loss(netsD[i], imgs[i], fake_imgs[i], random_fake_imgs[i],
                                               sent_emb, real_labels, fake_labels)
                     # backward and update parameters
                     errD.backward()
