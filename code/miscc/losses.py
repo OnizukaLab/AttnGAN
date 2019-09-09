@@ -133,11 +133,12 @@ def words_loss(img_features, words_emb, labels,
 
 
 # ##################Loss for G and Ds##############################
-def discriminator_loss(netD, real_imgs, fake_imgs, conditions,
+def discriminator_loss(netD, real_imgs, fake_imgs, random_fake_imgs, conditions,
                        real_labels, fake_labels):
     # Forward
     real_features = netD(real_imgs)
     fake_features = netD(fake_imgs.detach())
+    random_fake_features = netD(random_fake_imgs.detach())
     # loss
     #
     cond_real_logits = netD.COND_DNET(real_features, conditions)
@@ -152,10 +153,12 @@ def discriminator_loss(netD, real_imgs, fake_imgs, conditions,
     if netD.UNCOND_DNET is not None:
         real_logits = netD.UNCOND_DNET(real_features)
         fake_logits = netD.UNCOND_DNET(fake_features)
+        random_fake_logits = netD.UNCOND_DNET(random_fake_features)
         real_errD = nn.BCELoss()(real_logits, real_labels)
         fake_errD = nn.BCELoss()(fake_logits, fake_labels)
+        random_fake_errD = nn.BCELoss()(random_fake_logits, fake_labels)
         errD = ((real_errD + cond_real_errD) / 2. +
-                (fake_errD + cond_fake_errD + cond_wrong_errD) / 3.)
+                (fake_errD + cond_fake_errD + cond_wrong_errD) / 3.) + (random_fake_errD / 2.)
     else:
         errD = cond_real_errD + (cond_fake_errD + cond_wrong_errD) / 2.
     return errD

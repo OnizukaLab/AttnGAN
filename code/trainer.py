@@ -256,10 +256,18 @@ class condGANTrainer(object):
                     mask = mask[:, :num_words]
 
                 #######################################################
-                # (2) Generate fake images
+                # (2-1) Generate fake images
                 ######################################################
                 noise.data.normal_(0, 1)
                 fake_imgs, _, mu, logvar = netG(noise, sent_emb, words_embs, mask)
+
+                #######################################################
+                # (2-2) Generate fake images for random noise
+                ######################################################
+                noise.data.normal_(0, 1)
+                noise_like_sent = torch.normal(mean=0, std=torch.ones_like(sent_emb))
+                noise_like_words = torch.zeros_like(words_embs)
+                random_fake_imgs, _, _, _ = netG(noise, noise_like_sent, noise_like_words, mask)
 
                 #######################################################
                 # (3) Update D network
@@ -268,7 +276,7 @@ class condGANTrainer(object):
                 D_logs = ''
                 for i in range(len(netsD)):
                     netsD[i].zero_grad()
-                    errD = discriminator_loss(netsD[i], imgs[i], fake_imgs[i],
+                    errD = discriminator_loss(netsD[i], imgs[i], fake_imgs[i], random_fake_imgs,
                                               sent_emb, real_labels, fake_labels)
                     # backward and update parameters
                     errD.backward()
@@ -301,7 +309,7 @@ class condGANTrainer(object):
                 if gen_iterations % 100 == 0:
                     print(D_logs + '\n' + G_logs)
                 # save images
-                if gen_iterations % 1000 == 0:
+                if gen_iterations // self.num_batches % 50 == 0:
                     backup_para = copy_G_params(netG)
                     load_params(netG, avg_param_G)
                     self.save_img_results(netG, fixed_noise, sent_emb,
