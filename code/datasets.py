@@ -117,29 +117,29 @@ class TextDataset(data.Dataset):
 
         self.class_id = self.load_class_id(split_dir, len(self.filenames))
 
-        filepath = os.path.join(self.data_dir, 'CUB_200_2011/images.txt')
-        with open(filepath, "r") as f:
-            filenames = [line.strip().split()[1][:-4] for line in f]
-        index_path = os.path.join(self.data_dir, "../../long_idx.pickle")
-        with open(index_path, "rb") as f:
-            index = pickle.load(f)
-        f2i = {k: v for k, v in zip(filenames, index)}
-        self.idx = [f2i[f] for f in self.filenames]
-        # drop None caption
-        new_filenames = []
-        new_captions = []
-        new_class_id = []
-        new_idx = []
-        for i, idx in enumerate(self.idx):
-            if idx is not None:
-                new_filenames.append(self.filenames[i])
-                new_captions += self.captions[i*self.embeddings_num:(i+1)*self.embeddings_num]
-                new_class_id.append(self.class_id[i])
-                new_idx.append(self.idx[i])
-        self.filenames = new_filenames
-        self.captions = new_captions
-        self.class_id = new_class_id
-        self.idx = new_idx
+        # filepath = os.path.join(self.data_dir, 'CUB_200_2011/images.txt')
+        # with open(filepath, "r") as f:
+        #     filenames = [line.strip().split()[1][:-4] for line in f]
+        # index_path = os.path.join(self.data_dir, "../../long_idx.pickle")
+        # with open(index_path, "rb") as f:
+        #     index = pickle.load(f)
+        # f2i = {k: v for k, v in zip(filenames, index)}
+        # self.idx = [f2i[f] for f in self.filenames]
+        # # drop None caption
+        # new_filenames = []
+        # new_captions = []
+        # new_class_id = []
+        # new_idx = []
+        # for i, idx in enumerate(self.idx):
+        #     if idx is not None:
+        #         new_filenames.append(self.filenames[i])
+        #         new_captions += self.captions[i*self.embeddings_num:(i+1)*self.embeddings_num]
+        #         new_class_id.append(self.class_id[i])
+        #         new_idx.append(self.idx[i])
+        # self.filenames = new_filenames
+        # self.captions = new_captions
+        # self.class_id = new_class_id
+        # self.idx = new_idx
         self.number_example = len(self.filenames)
 
     def load_bbox(self):
@@ -328,7 +328,7 @@ class TextDataset(data.Dataset):
         imgs = get_imgs(img_name, self.imsize,
                         bbox, self.transform, normalize=self.norm)
         # random select a sentence
-        sent_ix = self.idx[index]
+        sent_ix = 0
         new_sent_ix = index * self.embeddings_num + sent_ix
         caps, cap_len = self.get_caption(new_sent_ix)
         return imgs, caps, cap_len, cls_id, key
