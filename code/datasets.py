@@ -122,7 +122,7 @@ class TextDataset(data.Dataset):
         index_path = os.path.join(self.data_dir, "../../short_idx.pickle")
         with open(index_path, "rb") as f:
             index = pickle.load(f)
-        f2i = {k: v for k, v in zip(filepath, index)}
+        f2i = {k[:-4]: v for k, v in zip(filepath, index)}
         self.idx = [f2i[f] for f in self.filenames]
 
     def load_bbox(self):
